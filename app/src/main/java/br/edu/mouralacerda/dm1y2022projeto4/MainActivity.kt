@@ -6,7 +6,10 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import br.edu.mouralacerda.dm1y2022projeto4.databinding.ActivityMainBinding
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,15 +28,50 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, NovoCarro::class.java))
 
         }
+
+        b.lstCarro.setOnItemLongClickListener { adapterView, view, i, l ->
+
+            val c: Carro = adapterView.adapter.getItem(i) as Carro
+
+            CoroutineScope(Dispatchers.IO).launch {
+                // executa paralelo à UI thread
+                CarroDatabase.getInstance(this@MainActivity).carroDao().deletar(c)
+
+                withContext(Dispatchers.Main) {
+                    // executa na UI thread
+                    atuaizarLista()
+                }
+            }
+
+            true
+        }
     }
 
     override fun onResume() {
         super.onResume()
 
-        b.lstCarro.adapter = ArrayAdapter (this,
-            android.R.layout.simple_list_item_1,
-            CarroDatabase.getInstance(this).carroDao().listar()
-        )
+        atuaizarLista()
+
+    }
+
+    fun atuaizarLista() {
+
+
+        var carros: List<Carro>
+
+        CoroutineScope(Dispatchers.IO).launch {
+            // executa paralelo à UI thread
+            carros = CarroDatabase.getInstance(this@MainActivity).carroDao().listar()
+
+            withContext(Dispatchers.Main) {
+                // executa na UI thread
+                b.lstCarro.adapter = ArrayAdapter(
+                    this@MainActivity,
+                    android.R.layout.simple_list_item_1,
+                    carros
+                )
+            }
+        }
 
     }
 

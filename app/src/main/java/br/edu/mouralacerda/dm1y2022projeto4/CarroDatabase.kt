@@ -25,7 +25,7 @@ abstract class CarroDatabase : RoomDatabase() {
 
         private fun criaBanco(context: Context): CarroDatabase {
             return Room.databaseBuilder(context, CarroDatabase::class.java, DATABASE)
-                .allowMainThreadQueries()
+//                .allowMainThreadQueries()
                 .build()
         }
     }

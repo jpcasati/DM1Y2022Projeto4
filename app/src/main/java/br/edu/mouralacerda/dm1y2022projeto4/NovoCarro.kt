@@ -2,7 +2,9 @@ package br.edu.mouralacerda.dm1y2022projeto4
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import br.edu.mouralacerda.dm1y2022projeto4.databinding.ActivityNovoCarroBinding
+import kotlinx.coroutines.*
 
 class NovoCarro : AppCompatActivity() {
 
@@ -24,9 +26,17 @@ class NovoCarro : AppCompatActivity() {
                 b.edtValor.text.toString().toDouble()
             )
 
-            CarroDatabase.getInstance(this).carroDao().salvar(carro)
 
-            finish()
+            CoroutineScope(Dispatchers.IO).launch {
+                // executa paralelo à UI thread
+                CarroDatabase.getInstance(this@NovoCarro).carroDao().salvar(carro)
+
+                withContext(Dispatchers.Main) {
+                    // executa na UI thread
+                    Toast.makeText(this@NovoCarro, "Salvo com sucesso!", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
 
         }
 
